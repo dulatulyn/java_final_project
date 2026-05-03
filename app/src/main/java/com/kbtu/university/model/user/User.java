@@ -42,6 +42,10 @@ public abstract class User implements Serializable {
         return passwordHash;
     }
 
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
     public String getLanguage() {
         return language;
     }

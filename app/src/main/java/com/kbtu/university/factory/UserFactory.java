@@ -5,6 +5,7 @@ import com.kbtu.university.model.enums.TitleEnum;
 import com.kbtu.university.model.user.Admin;
 import com.kbtu.university.model.user.Employee;
 import com.kbtu.university.model.user.Manager;
+import com.kbtu.university.model.user.RegistrarOfficer;
 import com.kbtu.university.model.user.Student;
 import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.storage.DataStorage;
@@ -16,6 +17,7 @@ public class UserFactory {
     private static int nextStudentId = 1;
     private static int nextTeacherId = 1;
     private static int nextManagerId = 1;
+    private static int nextRegistrarId = 1;
     private static int nextAdminId = 1;
 
     private UserFactory() {}
@@ -40,6 +42,14 @@ public class UserFactory {
         Manager m = new Manager(nextId("M", nextManagerId++), login, password, salary, hireDate, school, title, type);
         DataStorage.getInstance().addUser(m);
         return m;
+    }
+
+    public static RegistrarOfficer createRegistrar(String login, String password,
+                                                   double salary, LocalDate hireDate, String school) {
+        RegistrarOfficer r = new RegistrarOfficer(
+                nextId("R", nextRegistrarId++), login, password, salary, hireDate, school);
+        DataStorage.getInstance().addUser(r);
+        return r;
     }
 
     public static Student createStudent(String login, String password, String major, int year) {

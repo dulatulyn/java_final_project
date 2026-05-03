@@ -17,7 +17,6 @@ public class Teacher extends Employee {
     public static final int MAX_RATING = 5;
 
     protected TitleEnum title;
-    protected List<Course> courses;
     protected List<Integer> ratings;
 
     public Teacher(String id, String login, String passwordHash,
@@ -25,7 +24,6 @@ public class Teacher extends Employee {
                    TitleEnum title) {
         super(id, login, passwordHash, salary, hireDate, school);
         this.title = title;
-        this.courses = new ArrayList<>();
         this.ratings = new ArrayList<>();
     }
 
@@ -35,7 +33,7 @@ public class Teacher extends Employee {
 
     public List<Student> viewStudents() {
         List<Student> result = new ArrayList<>();
-        for (Course c : courses) {
+        for (Course c : Manager.getCoursesOf(this)) {
             for (Student s : c.getEnrolledStudents()) {
                 if (!result.contains(s)) {
                     result.add(s);
@@ -47,12 +45,6 @@ public class Teacher extends Employee {
 
     public void sendComplaint(Manager to, String text) {
         System.out.println("[complaint " + this.id + " -> manager " + to.getId() + "] " + text);
-    }
-
-    public void addCourse(Course c) {
-        if (!courses.contains(c)) {
-            courses.add(c);
-        }
     }
 
     public void addRating(int rating) {
@@ -75,10 +67,6 @@ public class Teacher extends Employee {
 
     public TitleEnum getTitle() {
         return title;
-    }
-
-    public List<Course> getCourses() {
-        return courses;
     }
 
     public List<Integer> getRatings() {

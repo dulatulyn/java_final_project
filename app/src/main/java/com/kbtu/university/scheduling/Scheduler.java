@@ -3,6 +3,7 @@ package com.kbtu.university.scheduling;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Lesson;
 import com.kbtu.university.model.academic.Room;
+import com.kbtu.university.model.user.Manager;
 import com.kbtu.university.model.user.Teacher;
 
 import java.time.DayOfWeek;
@@ -132,7 +133,7 @@ public class Scheduler {
     }
 
     private static Teacher pickTeacher(Course course, LocalDateTime slot, List<Lesson> placed) {
-        for (Teacher candidate : course.getInstructors()) {
+        for (Teacher candidate : Manager.getInstructorsOf(course)) {
             boolean busy = false;
             for (Lesson l : placed) {
                 if (l.getDateTime().equals(slot)

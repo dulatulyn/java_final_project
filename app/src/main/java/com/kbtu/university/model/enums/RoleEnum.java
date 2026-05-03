@@ -4,6 +4,7 @@ public enum RoleEnum {
     STUDENT,
     TEACHER,
     MANAGER,
+    REGISTRAR,
     ADMIN,
     RESEARCHER
 }

@@ -1,19 +1,15 @@
 package com.kbtu.university.cli;
 
 import com.kbtu.university.model.academic.Course;
-import com.kbtu.university.model.academic.Room;
+import com.kbtu.university.model.admin.Request;
+import com.kbtu.university.model.enums.LessonType;
+import com.kbtu.university.model.enums.RoomType;
 import com.kbtu.university.model.user.Manager;
-import com.kbtu.university.model.user.Student;
 import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.model.user.User;
-import com.kbtu.university.scheduling.Constraint;
 import com.kbtu.university.scheduling.Schedule;
-import com.kbtu.university.scheduling.Scheduler;
 import com.kbtu.university.storage.DataStorage;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Scanner;
 
 public class ManagerMenu implements Menu {
@@ -26,13 +22,13 @@ public class ManagerMenu implements Menu {
         while (true) {
             System.out.println();
             System.out.println("Manager menu (" + manager.getType() + ")");
-            System.out.println("1. View students by GPA");
-            System.out.println("2. View students alphabetically");
-            System.out.println("3. Approve registration");
-            System.out.println("4. Assign teacher to course");
-            System.out.println("5. Generate report");
-            System.out.println("6. Publish news");
-            System.out.println("7. Run scheduler");
+            System.out.println("1. Assign teacher to course");
+            System.out.println("2. Add course for registration");
+            System.out.println("3. Publish news");
+            System.out.println("4. Generate schedule");
+            System.out.println("5. View pending requests");
+            System.out.println("6. Sign request");
+            System.out.println("7. Reject request");
             System.out.println("8. View top cited researchers of school");
             System.out.println("9. View top cited papers of year");
             System.out.println("0. Logout");
@@ -43,23 +39,6 @@ public class ManagerMenu implements Menu {
                 manager.logout();
                 return;
             } else if (choice.equals("1")) {
-                printStudents(manager.viewStudentsByGpa());
-            } else if (choice.equals("2")) {
-                printStudents(manager.viewStudentsByLogin());
-            } else if (choice.equals("3")) {
-                System.out.print("Student id: ");
-                String sid = scanner.nextLine().trim();
-                System.out.print("Course code: ");
-                String code = scanner.nextLine().trim();
-                User s = db.findUserById(sid);
-                Course c = db.findCourseByCode(code);
-                if (s instanceof Student && c != null) {
-                    manager.approveRegistration((Student) s, c);
-                    System.out.println("Approved");
-                } else {
-                    System.out.println("Student or course not found");
-                }
-            } else if (choice.equals("4")) {
                 System.out.print("Teacher id: ");
                 String tid = scanner.nextLine().trim();
                 System.out.print("Course code: ");
@@ -72,20 +51,30 @@ public class ManagerMenu implements Menu {
                 } else {
                     System.out.println("Teacher or course not found");
                 }
-            } else if (choice.equals("5")) {
-                System.out.println(manager.generateReport(manager.viewStudentsByGpa()));
-            } else if (choice.equals("6")) {
+            } else if (choice.equals("2")) {
+                addCourse(scanner, db);
+            } else if (choice.equals("3")) {
                 System.out.print("Headline: ");
                 String headline = scanner.nextLine();
                 manager.publishNews(headline);
                 System.out.println("News published to " + db.getUsers().size() + " accounts");
+            } else if (choice.equals("4")) {
+                printSchedule(manager.generateSchedule());
+            } else if (choice.equals("5")) {
+                if (manager.viewPendingRequests().isEmpty()) {
+                    System.out.println("  (no pending requests)");
+                }
+                for (Request r : manager.viewPendingRequests()) {
+                    System.out.println("  " + r);
+                }
+            } else if (choice.equals("6")) {
+                System.out.print("Request id: ");
+                String rid = scanner.nextLine().trim();
+                System.out.println(manager.signRequest(rid) ? "Signed" : "Request not found");
             } else if (choice.equals("7")) {
-                List<Course> courses = db.getCourses();
-                List<Room> rooms = db.getRooms();
-                List<LocalDateTime> slots = Scheduler.buildWeek(LocalDate.of(2026, 1, 5), 8);
-                List<Constraint> constraints = Scheduler.defaultConstraints();
-                Schedule schedule = Scheduler.multiStart(courses, rooms, slots, constraints, 30, 42L);
-                printSchedule(schedule);
+                System.out.print("Request id: ");
+                String rid = scanner.nextLine().trim();
+                System.out.println(manager.rejectRequest(rid) ? "Rejected" : "Request not found");
             } else if (choice.equals("8")) {
                 System.out.print("School: ");
                 String school = scanner.nextLine().trim();
@@ -105,15 +94,33 @@ public class ManagerMenu implements Menu {
         }
     }
 
-    private void printStudents(List<Student> students) {
-        if (students.isEmpty()) {
-            System.out.println("  (no students)");
+    private void addCourse(Scanner scanner, DataStorage db) {
+        System.out.print("Code: ");
+        String code = scanner.nextLine().trim();
+        if (db.findCourseByCode(code) != null) {
+            System.out.println("Course with this code already exists");
             return;
         }
-        for (Student s : students) {
-            System.out.println("  " + s.getId() + " " + s.getLogin()
-                    + " gpa=" + s.getGpa() + " year=" + s.getYear());
-        }
+        System.out.print("Name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Credits: ");
+        int credits = parseInt(scanner.nextLine().trim(), 3);
+        System.out.print("Max students: ");
+        int maxStudents = parseInt(scanner.nextLine().trim(), 30);
+        System.out.print("Year of study (1-4): ");
+        int year = parseInt(scanner.nextLine().trim(), 1);
+        System.out.println("Lesson type: 1=LECTURE 2=PRACTICE");
+        System.out.print("> ");
+        int lt = parseInt(scanner.nextLine().trim(), 1);
+        LessonType lessonType = lt == 2 ? LessonType.PRACTICE : LessonType.LECTURE;
+        System.out.println("Required room: 1=LECTURE_HALL 2=LAB 3=SEMINAR");
+        System.out.print("> ");
+        int rt = parseInt(scanner.nextLine().trim(), 1);
+        RoomType roomType = rt == 2 ? RoomType.LAB : (rt == 3 ? RoomType.SEMINAR : RoomType.LECTURE_HALL);
+        Course c = new Course(code, name, credits, maxStudents, year, lessonType, roomType);
+        db.addCourse(c);
+        db.log("Course " + code + " added for year " + year);
+        System.out.println("Course added");
     }
 
     private void printSchedule(Schedule schedule) {

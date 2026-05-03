@@ -3,7 +3,6 @@ package com.kbtu.university.model.academic;
 import com.kbtu.university.model.enums.LessonType;
 import com.kbtu.university.model.enums.RoomType;
 import com.kbtu.university.model.user.Student;
-import com.kbtu.university.model.user.Teacher;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,7 +19,6 @@ public class Course implements Serializable {
     private int yearOfStudy;
     private LessonType lessonType;
     private RoomType requiredRoomType;
-    private List<Teacher> instructors;
     private List<Student> enrolledStudents;
     private List<Lesson> lessons;
 
@@ -33,15 +31,8 @@ public class Course implements Serializable {
         this.yearOfStudy = yearOfStudy;
         this.lessonType = lessonType;
         this.requiredRoomType = requiredRoomType;
-        this.instructors = new ArrayList<>();
         this.enrolledStudents = new ArrayList<>();
         this.lessons = new ArrayList<>();
-    }
-
-    public void addInstructor(Teacher t) {
-        if (!instructors.contains(t)) {
-            instructors.add(t);
-        }
     }
 
     public void addStudent(Student s) {
@@ -88,10 +79,6 @@ public class Course implements Serializable {
 
     public RoomType getRequiredRoomType() {
         return requiredRoomType;
-    }
-
-    public List<Teacher> getInstructors() {
-        return instructors;
     }
 
     public List<Student> getEnrolledStudents() {

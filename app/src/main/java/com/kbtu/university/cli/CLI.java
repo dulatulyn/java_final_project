@@ -2,6 +2,7 @@ package com.kbtu.university.cli;
 
 import com.kbtu.university.model.user.Admin;
 import com.kbtu.university.model.user.Manager;
+import com.kbtu.university.model.user.RegistrarOfficer;
 import com.kbtu.university.model.user.Student;
 import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.model.user.User;
@@ -83,6 +84,7 @@ public class CLI {
     private static Menu pickMenu(User user) {
         if (user instanceof Admin) return new AdminMenu();
         if (user instanceof Manager) return new ManagerMenu();
+        if (user instanceof RegistrarOfficer) return new RegistrarMenu();
         if (user instanceof Teacher) return new TeacherMenu();
         if (user instanceof Student) return new StudentMenu();
         return null;

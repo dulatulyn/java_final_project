@@ -1,92 +1,91 @@
 package com.kbtu.university.model.user;
 
 import com.kbtu.university.model.academic.Course;
+import com.kbtu.university.model.admin.Request;
 import com.kbtu.university.model.enums.ManagerTypeEnum;
 import com.kbtu.university.model.enums.RoleEnum;
 import com.kbtu.university.model.enums.TitleEnum;
+import com.kbtu.university.scheduling.Constraint;
+import com.kbtu.university.scheduling.Schedule;
+import com.kbtu.university.scheduling.Scheduler;
 import com.kbtu.university.storage.DataStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class Manager extends Teacher {
+public class Manager extends Employee {
 
     private static final long serialVersionUID = 1L;
 
+    private static final LocalDate SCHEDULE_WEEK_START = LocalDate.of(2026, 1, 5);
+    private static final int SCHEDULE_PAIRS_PER_DAY = 8;
+    private static final int SCHEDULE_RESTARTS = 30;
+    private static final long SCHEDULE_SEED = 42L;
+
+    private TitleEnum title;
     private ManagerTypeEnum type;
 
     public Manager(String id, String login, String passwordHash,
                    double salary, LocalDate hireDate, String school,
                    TitleEnum title, ManagerTypeEnum type) {
-        super(id, login, passwordHash, salary, hireDate, school, title);
+        super(id, login, passwordHash, salary, hireDate, school);
+        this.title = title;
         this.type = type;
     }
 
-    public void approveRegistration(Student s, Course c) {
-        DataStorage.getInstance().log("Manager " + id + " approved " + s.getId() + " for " + c.getCode());
-    }
-
     public void assignTeacher(Teacher t, Course c) {
-        c.addInstructor(t);
-        t.addCourse(c);
+        DataStorage.getInstance().linkTeacherToCourse(c.getCode(), t.getId());
         DataStorage.getInstance().log("Manager " + id + " assigned " + t.getId() + " to " + c.getCode());
-    }
-
-    public String generateReport(List<Student> students) {
-        if (students.isEmpty()) {
-            return "Report: no students";
-        }
-        double totalGpa = 0;
-        int totalCredits = 0;
-        int totalFails = 0;
-        for (Student s : students) {
-            totalGpa += s.getGpa();
-            totalCredits += s.getTotalCredits();
-            totalFails += s.getFailCount();
-        }
-        double avgGpa = totalGpa / students.size();
-        return "Report: " + students.size() + " students"
-                + ", avg GPA = " + avgGpa
-                + ", total credits = " + totalCredits
-                + ", total fails = " + totalFails;
     }
 
     public void publishNews(String headline) {
         DataStorage.getInstance().publishNews(headline);
     }
 
-    public List<Student> viewStudentsByGpa() {
-        List<Student> students = collectStudents();
-        students.sort(new Comparator<Student>() {
-            @Override
-            public int compare(Student a, Student b) {
-                return Double.compare(b.getGpa(), a.getGpa());
-            }
-        });
-        return students;
+    public Schedule generateSchedule() {
+        DataStorage db = DataStorage.getInstance();
+        List<LocalDateTime> slots = Scheduler.buildWeek(SCHEDULE_WEEK_START, SCHEDULE_PAIRS_PER_DAY);
+        List<Constraint> constraints = Scheduler.defaultConstraints();
+        Schedule schedule = Scheduler.multiStart(
+                db.getCourses(), db.getRooms(), slots, constraints,
+                SCHEDULE_RESTARTS, SCHEDULE_SEED);
+        db.log("Manager " + id + " generated schedule: placed=" + schedule.getLessons().size()
+                + " vacancies=" + schedule.countVacancies()
+                + " unplaced=" + schedule.getUnplaced().size());
+        return schedule;
     }
 
-    public List<Student> viewStudentsByLogin() {
-        List<Student> students = collectStudents();
-        students.sort(new Comparator<Student>() {
-            @Override
-            public int compare(Student a, Student b) {
-                return a.getLogin().compareTo(b.getLogin());
-            }
-        });
-        return students;
+    public List<Request> viewPendingRequests() {
+        return DataStorage.getInstance().pendingRequests();
     }
 
-    private List<Student> collectStudents() {
-        List<Student> students = new ArrayList<>();
-        for (User u : DataStorage.getInstance().getUsers()) {
-            if (u instanceof Student) {
-                students.add((Student) u);
-            }
-        }
-        return students;
+    public boolean signRequest(String requestId) {
+        Request r = DataStorage.getInstance().findRequestById(requestId);
+        if (r == null) return false;
+        r.sign(this.id);
+        DataStorage.getInstance().log("Manager " + id + " signed " + requestId);
+        return true;
+    }
+
+    public boolean rejectRequest(String requestId) {
+        Request r = DataStorage.getInstance().findRequestById(requestId);
+        if (r == null) return false;
+        r.reject(this.id);
+        DataStorage.getInstance().log("Manager " + id + " rejected " + requestId);
+        return true;
+    }
+
+    public static List<Teacher> getInstructorsOf(Course c) {
+        return DataStorage.getInstance().findInstructors(c.getCode());
+    }
+
+    public static List<Course> getCoursesOf(Teacher t) {
+        return DataStorage.getInstance().findCoursesOf(t.getId());
+    }
+
+    public TitleEnum getTitle() {
+        return title;
     }
 
     public ManagerTypeEnum getType() {

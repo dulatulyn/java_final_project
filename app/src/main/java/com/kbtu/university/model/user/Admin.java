@@ -25,6 +25,14 @@ public class Admin extends User {
         DataStorage.getInstance().replaceUser(u);
     }
 
+    public boolean changePassword(String userId, String newPassword) {
+        User u = DataStorage.getInstance().findUserById(userId);
+        if (u == null) return false;
+        u.setPasswordHash(newPassword);
+        DataStorage.getInstance().log("Admin " + this.getId() + " changed password for " + userId);
+        return true;
+    }
+
     public List<String> viewLog() {
         return DataStorage.getInstance().getLog();
     }

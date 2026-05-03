@@ -12,6 +12,7 @@ import com.kbtu.university.model.research.ResearchPaper;
 import com.kbtu.university.model.research.ResearchPaperBuilder;
 import com.kbtu.university.model.research.ResearchProject;
 import com.kbtu.university.model.user.Manager;
+import com.kbtu.university.model.user.RegistrarOfficer;
 import com.kbtu.university.model.user.ResearcherRole;
 import com.kbtu.university.model.user.Student;
 import com.kbtu.university.model.user.Teacher;
@@ -43,6 +44,9 @@ public class Bootstrap {
         Manager dean = UserFactory.createManager(
                 "dean", "pass", 1200000, LocalDate.of(2010, 9, 1), "SITE",
                 TitleEnum.PROFESSOR, ManagerTypeEnum.DEAN);
+
+        RegistrarOfficer registrar = UserFactory.createRegistrar(
+                "registrar", "pass", 500000, LocalDate.of(2017, 9, 1), "SITE");
 
         ResearcherRole sidorovaResearcher = new ResearcherRole(sidorova, 12);
         db.addResearcher(sidorovaResearcher);
@@ -95,6 +99,10 @@ public class Bootstrap {
         registerSilently(third, netL);
         registerSilently(fourth, oopL);
         registerSilently(fourth, netP);
+
+        registrar.approveRegistration(first, mathL);
+        registrar.approveRegistration(second, dbL);
+        registrar.approveRegistration(third, oopL);
 
         ResearchPaper paper1 = new ResearchPaperBuilder()
                 .title("Image Recognition with CNNs")

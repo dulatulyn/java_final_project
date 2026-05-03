@@ -1,6 +1,8 @@
 package com.kbtu.university.model.user;
 
+import com.kbtu.university.model.admin.Request;
 import com.kbtu.university.model.enums.RoleEnum;
+import com.kbtu.university.storage.DataStorage;
 
 import java.time.LocalDate;
 
@@ -26,6 +28,10 @@ public class Employee extends User {
 
     public void sendMessage(Employee to, String text) {
         System.out.println("[msg " + this.id + " -> " + to.getId() + "] " + text);
+    }
+
+    public Request submitRequest(String text) {
+        return DataStorage.getInstance().submitRequest(this.id, text);
     }
 
     public double getSalary() {

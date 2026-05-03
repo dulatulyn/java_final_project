@@ -3,10 +3,13 @@ package com.kbtu.university.storage;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Mark;
 import com.kbtu.university.model.academic.Room;
+import com.kbtu.university.model.admin.Request;
+import com.kbtu.university.model.enums.RequestStatusEnum;
 import com.kbtu.university.model.research.ResearchPaper;
 import com.kbtu.university.model.research.ResearchProject;
 import com.kbtu.university.model.user.Employee;
 import com.kbtu.university.model.user.ResearcherRole;
+import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.model.user.User;
 
 import java.io.FileInputStream;
@@ -17,7 +20,9 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DataStorage implements Serializable {
 
@@ -34,6 +39,9 @@ public class DataStorage implements Serializable {
     private List<ResearchProject> projects;
     private List<String> news;
     private List<String> log;
+    private Map<String, List<String>> teacherAssignments;
+    private List<Request> requests;
+    private int nextRequestId;
 
     private transient List<NewsObserver> newsObservers;
 
@@ -47,6 +55,9 @@ public class DataStorage implements Serializable {
         this.projects = new ArrayList<>();
         this.news = new ArrayList<>();
         this.log = new ArrayList<>();
+        this.teacherAssignments = new HashMap<>();
+        this.requests = new ArrayList<>();
+        this.nextRequestId = 1;
         this.newsObservers = new ArrayList<>();
     }
 
@@ -196,6 +207,70 @@ public class DataStorage implements Serializable {
 
     public List<String> getNews() {
         return news;
+    }
+
+    public void linkTeacherToCourse(String courseCode, String teacherId) {
+        List<String> ids = teacherAssignments.get(courseCode);
+        if (ids == null) {
+            ids = new ArrayList<>();
+            teacherAssignments.put(courseCode, ids);
+        }
+        if (!ids.contains(teacherId)) {
+            ids.add(teacherId);
+        }
+    }
+
+    public List<Teacher> findInstructors(String courseCode) {
+        List<Teacher> result = new ArrayList<>();
+        List<String> ids = teacherAssignments.get(courseCode);
+        if (ids == null) return result;
+        for (String tid : ids) {
+            User u = findUserById(tid);
+            if (u instanceof Teacher) {
+                result.add((Teacher) u);
+            }
+        }
+        return result;
+    }
+
+    public List<Course> findCoursesOf(String teacherId) {
+        List<Course> result = new ArrayList<>();
+        for (Map.Entry<String, List<String>> e : teacherAssignments.entrySet()) {
+            if (e.getValue().contains(teacherId)) {
+                Course c = findCourseByCode(e.getKey());
+                if (c != null) result.add(c);
+            }
+        }
+        return result;
+    }
+
+    public Request submitRequest(String submitterId, String text) {
+        String id = String.format("REQ%03d", nextRequestId++);
+        Request r = new Request(id, submitterId, text);
+        requests.add(r);
+        log.add("Request " + id + " submitted by " + submitterId);
+        return r;
+    }
+
+    public Request findRequestById(String id) {
+        for (Request r : requests) {
+            if (r.getId().equals(id)) return r;
+        }
+        return null;
+    }
+
+    public List<Request> getRequests() {
+        return requests;
+    }
+
+    public List<Request> pendingRequests() {
+        List<Request> result = new ArrayList<>();
+        for (Request r : requests) {
+            if (r.getStatus() == RequestStatusEnum.PENDING) {
+                result.add(r);
+            }
+        }
+        return result;
     }
 
     public void log(String message) {

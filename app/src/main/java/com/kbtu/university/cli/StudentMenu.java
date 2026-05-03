@@ -28,6 +28,7 @@ public class StudentMenu implements Menu {
             System.out.println("5. View my schedule");
             System.out.println("6. Rate teacher");
             System.out.println("7. View received news");
+            System.out.println("8. View teachers of a course");
             System.out.println("0. Logout");
             System.out.print("> ");
 
@@ -85,6 +86,23 @@ public class StudentMenu implements Menu {
                 }
                 for (String n : student.getReceivedNews()) {
                     System.out.println("  " + n);
+                }
+            } else if (choice.equals("8")) {
+                System.out.print("Course code: ");
+                String code = scanner.nextLine().trim();
+                Course c = db.findCourseByCode(code);
+                if (c == null) {
+                    System.out.println("Course not found");
+                } else {
+                    java.util.List<Teacher> instructors = com.kbtu.university.model.user.Manager.getInstructorsOf(c);
+                    if (instructors.isEmpty()) {
+                        System.out.println("  (no instructors assigned)");
+                    }
+                    for (Teacher t : instructors) {
+                        System.out.println("  " + t.getId() + " " + t.getLogin()
+                                + " title=" + t.getTitle()
+                                + " avgRating=" + t.getAverageRating());
+                    }
                 }
             } else {
                 System.out.println("Unknown option");

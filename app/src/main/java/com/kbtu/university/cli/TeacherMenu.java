@@ -26,6 +26,7 @@ public class TeacherMenu implements Menu {
             System.out.println("3. Put mark");
             System.out.println("4. View my average rating");
             System.out.println("5. Send complaint to manager");
+            System.out.println("6. Submit request");
             System.out.println("0. Logout");
             System.out.print("> ");
 
@@ -34,7 +35,7 @@ public class TeacherMenu implements Menu {
                 teacher.logout();
                 return;
             } else if (choice.equals("1")) {
-                for (Course c : teacher.getCourses()) {
+                for (Course c : Manager.getCoursesOf(teacher)) {
                     System.out.println("  " + c);
                 }
             } else if (choice.equals("2")) {
@@ -84,6 +85,11 @@ public class TeacherMenu implements Menu {
                 } else {
                     System.out.println("Manager not found");
                 }
+            } else if (choice.equals("6")) {
+                System.out.print("Request text: ");
+                String text = scanner.nextLine();
+                com.kbtu.university.model.admin.Request r = teacher.submitRequest(text);
+                System.out.println("Submitted: " + r.getId());
             } else {
                 System.out.println("Unknown option");
             }
