@@ -104,6 +104,15 @@ public class Bootstrap {
         registrar.approveRegistration(second, dbL);
         registrar.approveRegistration(third, oopL);
 
+        java.time.LocalDateTime week1Mon9 = java.time.LocalDateTime.of(2026, 1, 5, 9, 0);
+        ivanov.markAttendance(third, oopL, week1Mon9, com.kbtu.university.model.enums.AttendanceStatusEnum.PRESENT);
+        ivanov.markAttendance(fourth, oopL, week1Mon9, com.kbtu.university.model.enums.AttendanceStatusEnum.LATE);
+        sidorova.markAttendance(second, dbL, week1Mon9.plusHours(1).plusMinutes(30),
+                com.kbtu.university.model.enums.AttendanceStatusEnum.ABSENT);
+
+        third.asFounder().createStartup("EduPath", "Personalized learning paths for students");
+        fourth.asFounder().createStartup("CampusBite", "Food delivery inside KBTU campus");
+
         ResearchPaper paper1 = new ResearchPaperBuilder()
                 .title("Image Recognition with CNNs")
                 .doi("10.1/img-cnn")

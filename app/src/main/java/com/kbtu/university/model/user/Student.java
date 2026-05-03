@@ -2,6 +2,7 @@ package com.kbtu.university.model.user;
 
 import com.kbtu.university.exception.CreditLimitException;
 import com.kbtu.university.exception.LowHIndexException;
+import com.kbtu.university.model.academic.Attendance;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Lesson;
 import com.kbtu.university.model.academic.Mark;
@@ -85,6 +86,19 @@ public class Student extends User implements NewsObserver {
     public void rateTeacher(Teacher t, int rating) {
         t.addRating(rating);
         DataStorage.getInstance().log("Student " + id + " rated " + t.getId() + " with " + rating);
+    }
+
+    public List<Attendance> viewMyAttendance() {
+        return DataStorage.getInstance().findAttendanceByStudent(this.id);
+    }
+
+    public StartupFounderRole asFounder() {
+        StartupFounderRole role = DataStorage.getInstance().findFounderByUserId(this.id);
+        if (role == null) {
+            role = new StartupFounderRole(this);
+            DataStorage.getInstance().addStartupFounder(role);
+        }
+        return role;
     }
 
     public void setSupervisor(ResearcherRole r) throws LowHIndexException {

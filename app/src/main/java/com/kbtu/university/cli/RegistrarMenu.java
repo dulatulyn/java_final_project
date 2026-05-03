@@ -1,9 +1,11 @@
 package com.kbtu.university.cli;
 
 import com.kbtu.university.model.academic.Course;
+import com.kbtu.university.model.academic.Lesson;
 import com.kbtu.university.model.user.RegistrarOfficer;
 import com.kbtu.university.model.user.Student;
 import com.kbtu.university.model.user.User;
+import com.kbtu.university.scheduling.Schedule;
 import com.kbtu.university.storage.DataStorage;
 
 import java.util.List;
@@ -23,6 +25,7 @@ public class RegistrarMenu implements Menu {
             System.out.println("2. View students alphabetically");
             System.out.println("3. Approve registration");
             System.out.println("4. Generate enrollment report");
+            System.out.println("5. Generate schedule");
             System.out.println("0. Logout");
             System.out.print("> ");
 
@@ -49,6 +52,8 @@ public class RegistrarMenu implements Menu {
                 }
             } else if (choice.equals("4")) {
                 System.out.println(registrar.generateReport(registrar.viewStudentsByGpa()));
+            } else if (choice.equals("5")) {
+                printSchedule(registrar.generateSchedule());
             } else {
                 System.out.println("Unknown option");
             }
@@ -64,5 +69,16 @@ public class RegistrarMenu implements Menu {
             System.out.println("  " + s.getId() + " " + s.getLogin()
                     + " gpa=" + s.getGpa() + " year=" + s.getYear());
         }
+    }
+
+    private void printSchedule(Schedule schedule) {
+        for (Lesson l : schedule.getLessons()) {
+            String teacherName = l.getTeacher() == null ? "<Vacancy>" : l.getTeacher().getLogin();
+            System.out.printf("  %s  %-22s  room=%-5s  teacher=%s%n",
+                    l.getDateTime(), l.getCourse().getName(), l.getRoom().getNumber(), teacherName);
+        }
+        System.out.println("Placed: " + schedule.getLessons().size()
+                + ", Vacancies: " + schedule.countVacancies()
+                + ", Unplaced: " + schedule.getUnplaced().size());
     }
 }

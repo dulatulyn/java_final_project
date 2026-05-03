@@ -1,5 +1,6 @@
 package com.kbtu.university.storage;
 
+import com.kbtu.university.model.academic.Attendance;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Mark;
 import com.kbtu.university.model.academic.Room;
@@ -7,8 +8,10 @@ import com.kbtu.university.model.admin.Request;
 import com.kbtu.university.model.enums.RequestStatusEnum;
 import com.kbtu.university.model.research.ResearchPaper;
 import com.kbtu.university.model.research.ResearchProject;
+import com.kbtu.university.model.startup.Startup;
 import com.kbtu.university.model.user.Employee;
 import com.kbtu.university.model.user.ResearcherRole;
+import com.kbtu.university.model.user.StartupFounderRole;
 import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.model.user.User;
 
@@ -42,6 +45,10 @@ public class DataStorage implements Serializable {
     private Map<String, List<String>> teacherAssignments;
     private List<Request> requests;
     private int nextRequestId;
+    private List<Attendance> attendances;
+    private List<Startup> startups;
+    private int nextStartupId;
+    private List<StartupFounderRole> startupFounders;
 
     private transient List<NewsObserver> newsObservers;
 
@@ -58,6 +65,10 @@ public class DataStorage implements Serializable {
         this.teacherAssignments = new HashMap<>();
         this.requests = new ArrayList<>();
         this.nextRequestId = 1;
+        this.attendances = new ArrayList<>();
+        this.startups = new ArrayList<>();
+        this.nextStartupId = 1;
+        this.startupFounders = new ArrayList<>();
         this.newsObservers = new ArrayList<>();
     }
 
@@ -271,6 +282,75 @@ public class DataStorage implements Serializable {
             }
         }
         return result;
+    }
+
+    public void addAttendance(Attendance a) {
+        attendances.add(a);
+    }
+
+    public List<Attendance> getAttendances() {
+        return attendances;
+    }
+
+    public List<Attendance> findAttendanceByStudent(String studentId) {
+        List<Attendance> result = new ArrayList<>();
+        for (Attendance a : attendances) {
+            if (a.getStudentId().equals(studentId)) result.add(a);
+        }
+        return result;
+    }
+
+    public List<Attendance> findAttendanceByCourse(String courseCode) {
+        List<Attendance> result = new ArrayList<>();
+        for (Attendance a : attendances) {
+            if (a.getCourseCode().equals(courseCode)) result.add(a);
+        }
+        return result;
+    }
+
+    public Startup createStartup(String founderId, String name, String description) {
+        String id = String.format("ST%03d", nextStartupId++);
+        Startup s = new Startup(id, name, description, founderId);
+        startups.add(s);
+        log.add("Startup " + id + " founded by " + founderId);
+        return s;
+    }
+
+    public Startup findStartupById(String id) {
+        for (Startup s : startups) {
+            if (s.getId().equals(id)) return s;
+        }
+        return null;
+    }
+
+    public List<Startup> getStartups() {
+        return startups;
+    }
+
+    public List<Startup> findStartupsByMember(String userId) {
+        List<Startup> result = new ArrayList<>();
+        for (Startup s : startups) {
+            if (s.getMemberIds().contains(userId)) result.add(s);
+        }
+        return result;
+    }
+
+    public void addStartupFounder(StartupFounderRole role) {
+        if (!startupFounders.contains(role)) {
+            startupFounders.add(role);
+            log.add("StartupFounderRole granted to " + role.getWrappedUser().getId());
+        }
+    }
+
+    public StartupFounderRole findFounderByUserId(String userId) {
+        for (StartupFounderRole r : startupFounders) {
+            if (r.getWrappedUser().getId().equals(userId)) return r;
+        }
+        return null;
+    }
+
+    public List<StartupFounderRole> getStartupFounders() {
+        return startupFounders;
     }
 
     public void log(String message) {

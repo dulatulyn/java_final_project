@@ -27,6 +27,7 @@ public class TeacherMenu implements Menu {
             System.out.println("4. View my average rating");
             System.out.println("5. Send complaint to manager");
             System.out.println("6. Submit request");
+            System.out.println("7. Mark attendance");
             System.out.println("0. Logout");
             System.out.print("> ");
 
@@ -90,9 +91,42 @@ public class TeacherMenu implements Menu {
                 String text = scanner.nextLine();
                 com.kbtu.university.model.admin.Request r = teacher.submitRequest(text);
                 System.out.println("Submitted: " + r.getId());
+            } else if (choice.equals("7")) {
+                markAttendance(teacher, scanner, db);
             } else {
                 System.out.println("Unknown option");
             }
+        }
+    }
+
+    private void markAttendance(Teacher teacher, Scanner scanner, DataStorage db) {
+        System.out.print("Student id: ");
+        String sid = scanner.nextLine().trim();
+        System.out.print("Course code: ");
+        String code = scanner.nextLine().trim();
+        System.out.print("Lesson dateTime (YYYY-MM-DDTHH:MM, blank=now): ");
+        String dt = scanner.nextLine().trim();
+        java.time.LocalDateTime when;
+        try {
+            when = dt.isEmpty() ? java.time.LocalDateTime.now() : java.time.LocalDateTime.parse(dt);
+        } catch (java.time.format.DateTimeParseException e) {
+            System.out.println("Invalid dateTime, using now");
+            when = java.time.LocalDateTime.now();
+        }
+        System.out.println("Status: 1=PRESENT 2=ABSENT 3=LATE");
+        System.out.print("> ");
+        int st = parseInt(scanner.nextLine().trim(), 1);
+        com.kbtu.university.model.enums.AttendanceStatusEnum status =
+                st == 2 ? com.kbtu.university.model.enums.AttendanceStatusEnum.ABSENT
+                : st == 3 ? com.kbtu.university.model.enums.AttendanceStatusEnum.LATE
+                : com.kbtu.university.model.enums.AttendanceStatusEnum.PRESENT;
+        User s = db.findUserById(sid);
+        Course c = db.findCourseByCode(code);
+        if (s instanceof Student && c != null) {
+            teacher.markAttendance((Student) s, c, when, status);
+            System.out.println("Recorded");
+        } else {
+            System.out.println("Student or course not found");
         }
     }
 

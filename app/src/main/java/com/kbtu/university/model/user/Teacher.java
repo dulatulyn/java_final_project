@@ -1,11 +1,15 @@
 package com.kbtu.university.model.user;
 
+import com.kbtu.university.model.academic.Attendance;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Mark;
+import com.kbtu.university.model.enums.AttendanceStatusEnum;
 import com.kbtu.university.model.enums.RoleEnum;
 import com.kbtu.university.model.enums.TitleEnum;
+import com.kbtu.university.storage.DataStorage;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,13 @@ public class Teacher extends Employee {
 
     public void putMark(Student student, Course course, Mark mark) {
         student.addMark(mark);
+    }
+
+    public void markAttendance(Student student, Course course, LocalDateTime when, AttendanceStatusEnum status) {
+        Attendance a = new Attendance(student.getId(), course.getCode(), when, status);
+        DataStorage.getInstance().addAttendance(a);
+        DataStorage.getInstance().log("Teacher " + id + " marked " + student.getId()
+                + " " + status + " for " + course.getCode() + " @ " + when);
     }
 
     public List<Student> viewStudents() {

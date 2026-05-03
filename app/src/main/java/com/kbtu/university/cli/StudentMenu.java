@@ -29,6 +29,10 @@ public class StudentMenu implements Menu {
             System.out.println("6. Rate teacher");
             System.out.println("7. View received news");
             System.out.println("8. View teachers of a course");
+            System.out.println("9. View my attendance");
+            System.out.println("10. Create startup");
+            System.out.println("11. Join startup");
+            System.out.println("12. View my startups");
             System.out.println("0. Logout");
             System.out.print("> ");
 
@@ -103,6 +107,33 @@ public class StudentMenu implements Menu {
                                 + " title=" + t.getTitle()
                                 + " avgRating=" + t.getAverageRating());
                     }
+                }
+            } else if (choice.equals("9")) {
+                java.util.List<com.kbtu.university.model.academic.Attendance> records = student.viewMyAttendance();
+                if (records.isEmpty()) {
+                    System.out.println("  (no attendance records)");
+                }
+                for (com.kbtu.university.model.academic.Attendance a : records) {
+                    System.out.println("  " + a);
+                }
+            } else if (choice.equals("10")) {
+                System.out.print("Name: ");
+                String name = scanner.nextLine().trim();
+                System.out.print("Description: ");
+                String desc = scanner.nextLine().trim();
+                com.kbtu.university.model.startup.Startup s = student.asFounder().createStartup(name, desc);
+                System.out.println("Created: " + s.getId());
+            } else if (choice.equals("11")) {
+                System.out.print("Startup id: ");
+                String sid = scanner.nextLine().trim();
+                System.out.println(student.asFounder().joinStartup(sid) ? "Joined" : "Startup not found or already member");
+            } else if (choice.equals("12")) {
+                java.util.List<com.kbtu.university.model.startup.Startup> mine = student.asFounder().getStartups();
+                if (mine.isEmpty()) {
+                    System.out.println("  (no startups)");
+                }
+                for (com.kbtu.university.model.startup.Startup s : mine) {
+                    System.out.println("  " + s);
                 }
             } else {
                 System.out.println("Unknown option");
