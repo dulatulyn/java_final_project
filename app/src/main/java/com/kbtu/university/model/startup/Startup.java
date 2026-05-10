@@ -1,31 +1,32 @@
 package com.kbtu.university.model.startup;
 
+import com.kbtu.university.model.enums.RoleEnum;
 import com.kbtu.university.model.enums.StartupStatusEnum;
+import com.kbtu.university.model.user.User;
+import com.kbtu.university.model.user.UserDecorator;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Startup implements Serializable {
+public class Startup extends UserDecorator {
 
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private String startupId;
     private String name;
     private String description;
-    private String founderId;
     private List<String> memberIds;
     private StartupStatusEnum status;
     private LocalDate foundedDate;
 
-    public Startup(String id, String name, String description, String founderId) {
-        this.id = id;
+    public Startup(User founder, String startupId, String name, String description) {
+        super(founder);
+        this.startupId = startupId;
         this.name = name;
         this.description = description;
-        this.founderId = founderId;
         this.memberIds = new ArrayList<>();
-        this.memberIds.add(founderId);
+        this.memberIds.add(founder.getId());
         this.status = StartupStatusEnum.IDEA;
         this.foundedDate = LocalDate.now();
     }
@@ -40,8 +41,8 @@ public class Startup implements Serializable {
         this.status = newStatus;
     }
 
-    public String getId() {
-        return id;
+    public String getStartupId() {
+        return startupId;
     }
 
     public String getName() {
@@ -53,7 +54,7 @@ public class Startup implements Serializable {
     }
 
     public String getFounderId() {
-        return founderId;
+        return getWrappedUser().getId();
     }
 
     public List<String> getMemberIds() {
@@ -69,8 +70,13 @@ public class Startup implements Serializable {
     }
 
     @Override
+    public RoleEnum getRole() {
+        return getWrappedUser().getRole();
+    }
+
+    @Override
     public String toString() {
-        return "Startup[" + id + " \"" + name + "\" founder=" + founderId
+        return "Startup[" + startupId + " \"" + name + "\" founder=" + getFounderId()
                 + " members=" + memberIds.size() + " status=" + status + "]";
     }
 }

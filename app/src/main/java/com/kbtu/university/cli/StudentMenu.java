@@ -121,14 +121,14 @@ public class StudentMenu implements Menu {
                 String name = scanner.nextLine().trim();
                 System.out.print("Description: ");
                 String desc = scanner.nextLine().trim();
-                com.kbtu.university.model.startup.Startup s = student.asFounder().createStartup(name, desc);
-                System.out.println("Created: " + s.getId());
+                com.kbtu.university.model.startup.Startup s = student.foundStartup(name, desc);
+                System.out.println("Created: " + s.getStartupId());
             } else if (choice.equals("11")) {
                 System.out.print("Startup id: ");
                 String sid = scanner.nextLine().trim();
-                System.out.println(student.asFounder().joinStartup(sid) ? "Joined" : "Startup not found or already member");
+                System.out.println(student.joinStartup(sid) ? "Joined" : "Startup not found or already member");
             } else if (choice.equals("12")) {
-                java.util.List<com.kbtu.university.model.startup.Startup> mine = student.asFounder().getStartups();
+                java.util.List<com.kbtu.university.model.startup.Startup> mine = student.viewMyStartups();
                 if (mine.isEmpty()) {
                     System.out.println("  (no startups)");
                 }

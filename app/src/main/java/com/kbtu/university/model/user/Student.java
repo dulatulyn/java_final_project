@@ -92,13 +92,22 @@ public class Student extends User implements NewsObserver {
         return DataStorage.getInstance().findAttendanceByStudent(this.id);
     }
 
-    public StartupFounderRole asFounder() {
-        StartupFounderRole role = DataStorage.getInstance().findFounderByUserId(this.id);
-        if (role == null) {
-            role = new StartupFounderRole(this);
-            DataStorage.getInstance().addStartupFounder(role);
+    public com.kbtu.university.model.startup.Startup foundStartup(String name, String description) {
+        return DataStorage.getInstance().createStartup(this, name, description);
+    }
+
+    public boolean joinStartup(String startupId) {
+        com.kbtu.university.model.startup.Startup s = DataStorage.getInstance().findStartupById(startupId);
+        if (s == null) return false;
+        boolean added = s.addMember(this.id);
+        if (added) {
+            DataStorage.getInstance().log("Student " + id + " joined startup " + startupId);
         }
-        return role;
+        return added;
+    }
+
+    public List<com.kbtu.university.model.startup.Startup> viewMyStartups() {
+        return DataStorage.getInstance().findStartupsByMember(this.id);
     }
 
     public void setSupervisor(ResearcherRole r) throws LowHIndexException {

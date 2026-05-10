@@ -22,8 +22,9 @@ public class UserFactory {
 
     private UserFactory() {}
 
-    public static Admin createAdmin(String login, String password) {
-        Admin a = new Admin(nextId("A", nextAdminId++), login, password);
+    public static Admin createAdmin(String login, String password,
+                                    double salary, LocalDate hireDate, String school) {
+        Admin a = new Admin(nextId("A", nextAdminId++), login, password, salary, hireDate, school);
         DataStorage.getInstance().addUser(a);
         return a;
     }

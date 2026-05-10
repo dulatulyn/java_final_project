@@ -1,6 +1,7 @@
 package com.kbtu.university.cli;
 
 import com.kbtu.university.factory.UserFactory;
+import com.kbtu.university.model.admin.LogEntry;
 import com.kbtu.university.model.enums.ManagerTypeEnum;
 import com.kbtu.university.model.enums.TitleEnum;
 import com.kbtu.university.model.user.Admin;
@@ -69,8 +70,8 @@ public class AdminMenu implements Menu {
                     System.out.println("User not found");
                 }
             } else if (choice.equals("9")) {
-                for (String line : admin.viewLog()) {
-                    System.out.println("  " + line);
+                for (LogEntry entry : admin.viewLog()) {
+                    System.out.println("  " + entry);
                 }
             } else if (choice.equals("10")) {
                 System.out.print("File [university.dat]: ");
@@ -175,8 +176,12 @@ public class AdminMenu implements Menu {
         String login = scanner.nextLine().trim();
         System.out.print("Password: ");
         String password = scanner.nextLine().trim();
+        System.out.print("Salary: ");
+        double salary = parseDouble(scanner.nextLine().trim(), 0);
+        System.out.print("School: ");
+        String school = scanner.nextLine().trim();
         try {
-            UserFactory.createAdmin(login, password);
+            UserFactory.createAdmin(login, password, salary, LocalDate.now(), school);
             System.out.println("Created");
         } catch (RuntimeException e) {
             System.out.println("Failed: " + e.getMessage());

@@ -4,6 +4,7 @@ import com.kbtu.university.model.academic.Attendance;
 import com.kbtu.university.model.academic.Course;
 import com.kbtu.university.model.academic.Mark;
 import com.kbtu.university.model.academic.Room;
+import com.kbtu.university.model.admin.LogEntry;
 import com.kbtu.university.model.admin.Request;
 import com.kbtu.university.model.enums.RequestStatusEnum;
 import com.kbtu.university.model.research.ResearchPaper;
@@ -11,7 +12,6 @@ import com.kbtu.university.model.research.ResearchProject;
 import com.kbtu.university.model.startup.Startup;
 import com.kbtu.university.model.user.Employee;
 import com.kbtu.university.model.user.ResearcherRole;
-import com.kbtu.university.model.user.StartupFounderRole;
 import com.kbtu.university.model.user.Teacher;
 import com.kbtu.university.model.user.User;
 
@@ -41,14 +41,13 @@ public class DataStorage implements Serializable {
     private List<ResearchPaper> papers;
     private List<ResearchProject> projects;
     private List<String> news;
-    private List<String> log;
+    private List<LogEntry> log;
     private Map<String, List<String>> teacherAssignments;
     private List<Request> requests;
     private int nextRequestId;
     private List<Attendance> attendances;
     private List<Startup> startups;
     private int nextStartupId;
-    private List<StartupFounderRole> startupFounders;
 
     private transient List<NewsObserver> newsObservers;
 
@@ -68,7 +67,6 @@ public class DataStorage implements Serializable {
         this.attendances = new ArrayList<>();
         this.startups = new ArrayList<>();
         this.nextStartupId = 1;
-        this.startupFounders = new ArrayList<>();
         this.newsObservers = new ArrayList<>();
     }
 
@@ -86,14 +84,14 @@ public class DataStorage implements Serializable {
             }
         }
         users.add(u);
-        log.add("Added user " + u.getId() + " (" + u.getRole() + ")");
+        log.add(new LogEntry("Added user " + u.getId() + " (" + u.getRole() + ")"));
     }
 
     public void removeUser(String userId) {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getId().equals(userId)) {
                 users.remove(i);
-                log.add("Removed user " + userId);
+                log.add(new LogEntry("Removed user " + userId));
                 return;
             }
         }
@@ -103,7 +101,7 @@ public class DataStorage implements Serializable {
         for (int i = 0; i < users.size(); i++) {
             if (users.get(i).getId().equals(u.getId())) {
                 users.set(i, u);
-                log.add("Updated user " + u.getId());
+                log.add(new LogEntry("Updated user " + u.getId()));
                 return;
             }
         }
@@ -130,7 +128,7 @@ public class DataStorage implements Serializable {
     public void addResearcher(ResearcherRole r) {
         if (!researchers.contains(r)) {
             researchers.add(r);
-            log.add("Added researcher wrapping " + r.getWrappedUser().getId());
+            log.add(new LogEntry("Added researcher wrapping " + r.getWrappedUser().getId()));
         }
     }
 
@@ -198,7 +196,7 @@ public class DataStorage implements Serializable {
         for (NewsObserver o : newsObservers) {
             o.onNewsPublished(headline);
         }
-        log.add("News published: " + headline);
+        log.add(new LogEntry("News published: " + headline));
     }
 
     public void subscribeToNews(NewsObserver o) {
@@ -259,7 +257,7 @@ public class DataStorage implements Serializable {
         String id = String.format("REQ%03d", nextRequestId++);
         Request r = new Request(id, submitterId, text);
         requests.add(r);
-        log.add("Request " + id + " submitted by " + submitterId);
+        log.add(new LogEntry("Request " + id + " submitted by " + submitterId));
         return r;
     }
 
@@ -308,17 +306,17 @@ public class DataStorage implements Serializable {
         return result;
     }
 
-    public Startup createStartup(String founderId, String name, String description) {
+    public Startup createStartup(User founder, String name, String description) {
         String id = String.format("ST%03d", nextStartupId++);
-        Startup s = new Startup(id, name, description, founderId);
+        Startup s = new Startup(founder, id, name, description);
         startups.add(s);
-        log.add("Startup " + id + " founded by " + founderId);
+        log.add(new LogEntry("Startup " + id + " founded by " + founder.getId()));
         return s;
     }
 
     public Startup findStartupById(String id) {
         for (Startup s : startups) {
-            if (s.getId().equals(id)) return s;
+            if (s.getStartupId().equals(id)) return s;
         }
         return null;
     }
@@ -335,29 +333,11 @@ public class DataStorage implements Serializable {
         return result;
     }
 
-    public void addStartupFounder(StartupFounderRole role) {
-        if (!startupFounders.contains(role)) {
-            startupFounders.add(role);
-            log.add("StartupFounderRole granted to " + role.getWrappedUser().getId());
-        }
-    }
-
-    public StartupFounderRole findFounderByUserId(String userId) {
-        for (StartupFounderRole r : startupFounders) {
-            if (r.getWrappedUser().getId().equals(userId)) return r;
-        }
-        return null;
-    }
-
-    public List<StartupFounderRole> getStartupFounders() {
-        return startupFounders;
-    }
-
     public void log(String message) {
-        log.add(message);
+        log.add(new LogEntry(message));
     }
 
-    public List<String> getLog() {
+    public List<LogEntry> getLog() {
         return log;
     }
 

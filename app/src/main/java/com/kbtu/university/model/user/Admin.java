@@ -1,16 +1,19 @@
 package com.kbtu.university.model.user;
 
+import com.kbtu.university.model.admin.LogEntry;
 import com.kbtu.university.model.enums.RoleEnum;
 import com.kbtu.university.storage.DataStorage;
 
+import java.time.LocalDate;
 import java.util.List;
 
-public class Admin extends User {
+public class Admin extends Employee {
 
     private static final long serialVersionUID = 1L;
 
-    public Admin(String id, String login, String passwordHash) {
-        super(id, login, passwordHash);
+    public Admin(String id, String login, String passwordHash,
+                 double salary, LocalDate hireDate, String school) {
+        super(id, login, passwordHash, salary, hireDate, school);
     }
 
     public void addUser(User u) {
@@ -33,7 +36,7 @@ public class Admin extends User {
         return true;
     }
 
-    public List<String> viewLog() {
+    public List<LogEntry> viewLog() {
         return DataStorage.getInstance().getLog();
     }
 

@@ -30,7 +30,7 @@ public class Bootstrap {
             return;
         }
 
-        UserFactory.createAdmin("admin", "admin");
+        UserFactory.createAdmin("admin", "admin", 700000, LocalDate.of(2014, 9, 1), "ADMIN_OFFICE");
 
         Teacher ivanov = UserFactory.createTeacher(
                 "ivanov", "pass", 800000, LocalDate.of(2015, 9, 1), "SITE", TitleEnum.ASSOCIATE_PROFESSOR);
@@ -110,8 +110,8 @@ public class Bootstrap {
         sidorova.markAttendance(second, dbL, week1Mon9.plusHours(1).plusMinutes(30),
                 com.kbtu.university.model.enums.AttendanceStatusEnum.ABSENT);
 
-        third.asFounder().createStartup("EduPath", "Personalized learning paths for students");
-        fourth.asFounder().createStartup("CampusBite", "Food delivery inside KBTU campus");
+        third.foundStartup("EduPath", "Personalized learning paths for students");
+        fourth.foundStartup("CampusBite", "Food delivery inside KBTU campus");
 
         ResearchPaper paper1 = new ResearchPaperBuilder()
                 .title("Image Recognition with CNNs")
